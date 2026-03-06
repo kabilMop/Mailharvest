@@ -4,7 +4,10 @@
 # ─────────────────────────────────────────────
 
 import threading
-from datetime import datetime
+from datetime import datetime, timezone, timedelta
+
+# Indian Standard Time (UTC+5:30)
+IST = timezone(timedelta(hours=5, minutes=30))
 
 import streamlit as st
 
@@ -54,13 +57,13 @@ def log_activity(username, display_name, event, details=""):
     """
     if not GSPREAD_AVAILABLE:
         return
-    now = datetime.now()
+    now = datetime.now(IST)
     try:
         with _sheet_lock:
             wb = _get_workbook()
             ws = _get_or_create_sheet(wb, ACTIVITY_SHEET, ACTIVITY_HEADERS)
             ws.append_row(
-                [now.strftime("%Y-%m-%d"), now.strftime("%H:%M:%S"),
+                [now.strftime("%d-%m-%Y"), now.strftime("%I:%M:%S %p"),
                  username, display_name, event, details],
                 value_input_option="RAW"
             )
@@ -75,7 +78,7 @@ def update_user_summary(username, display_name, emails_found=0, extraction_done=
     """
     if not GSPREAD_AVAILABLE:
         return
-    today = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    today = datetime.now(IST).strftime("%d-%m-%Y %I:%M %p")
     try:
         with _sheet_lock:
             wb       = _get_workbook()
@@ -120,8 +123,8 @@ def append_email_results(results, username, display_name, mode=""):
         return
 
     now      = datetime.now()
-    date_str = now.strftime("%Y-%m-%d")
-    time_str = now.strftime("%H:%M:%S")
+    date_str = now.strftime("%d-%m-%Y")
+    time_str = now.strftime("%I:%M:%S %p")
 
     email_rows  = [r for r in results if r.get("email")]
     email_count = len(email_rows)
