@@ -1,0 +1,6 @@
+streamlit
+requests
+beautifulsoup4
+gspread
+google-auth
+cloudscraper
